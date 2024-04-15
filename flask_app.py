@@ -1,7 +1,6 @@
-from flask import Flask, render_template, request, send_file, send_from_directory
+from flask import Flask, render_template, request, send_file
 import yt_dlp as youtube_dl
 import os
-import shutil
 
 app = Flask(__name__)
 
@@ -48,7 +47,7 @@ def download():
 
 @app.route('/arc-sw.js')
 def serve_js():
-    return send_from_directory('mysite', 'arc-sw.js')
+    return send_file('arc-sw.js')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5678)
