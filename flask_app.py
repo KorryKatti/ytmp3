@@ -14,6 +14,10 @@ def clear_directory(directory):
         except Exception as e:
             print(f"Error deleting {file_path}: {e}")
 
+# Ensure that the 'lol' directory exists
+if not os.path.exists('./lol'):
+    os.makedirs('./lol')
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -32,18 +36,22 @@ def download():
     }
     # Clear the 'lol' directory before downloading the next file
     clear_directory('./lol')
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(youtube_url, download=True)
-        audio_path = ydl.prepare_filename(info)
-        # Manually change the extension to mp3
-        audio_path = os.path.splitext(audio_path)[0] + '.mp3'
-        print("Audio file path:", audio_path)  # Print the audio file path for debugging
-        if os.path.exists(audio_path):
-            print("Audio file downloaded successfully:", audio_path)
-            return send_file(audio_path, as_attachment=True)
-        else:
-            print("Error: Audio file not found at:", audio_path)
-            return "Error: Audio file not found", 404
+    try:
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(youtube_url, download=True)
+            audio_path = ydl.prepare_filename(info)
+            # Manually change the extension to mp3
+            audio_path = os.path.splitext(audio_path)[0] + '.mp3'
+            print("Audio file path:", audio_path)  # Print the audio file path for debugging
+            if os.path.exists(audio_path):
+                print("Audio file downloaded successfully:", audio_path)
+                return send_file(audio_path, as_attachment=True)
+            else:
+                print("Error: Audio file not found at:", audio_path)
+                return "Error: Audio file not found", 404
+    except youtube_dl.utils.ExtractorError as e:
+        print("ExtractorError:", e)
+        return "Error: Unable to download audio from the provided URL", 500
 
 @app.route('/arc-sw.js')
 def serve_js():
